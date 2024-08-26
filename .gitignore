@@ -1,0 +1,64 @@
+# Diretório de pacotes instalados
+venv/
+.env
+
+# Compilados Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Logs
+*.log
+*.out
+*.err
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db
+
+# Configurações do editor de texto/IDE
+.vscode/
+.idea/
+
+# Distribuição/Build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Módulos instalados
+.installed.cfg
+.pytest_cache/
+pip-wheel-metadata/
+
+# Arquivos de cobertura de testes
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Arquivos Docker
+docker-compose.override.yml
+
+# Arquivos de banco de dados
+*.sqlite3
+*.db
+*.db-journal
+
+# Arquivos de API (Swagger/OpenAPI)
+swagger.json
+swagger.yaml
+
+# Módulos ou arquivos de migrações (caso usem migrations em um framework específico)
+migrations/
+alembic/
+
+# Arquivos de pacotes e caches
+*.tar.gz
+*.zip
+*.whl
