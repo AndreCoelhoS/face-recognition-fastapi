@@ -5,6 +5,7 @@ import face_recognition
 import sqlite3
 import numpy as np
 import io
+from PIL import Image, ImageOps
 
 app = FastAPI()
 
@@ -37,7 +38,9 @@ class FaceRegistration(BaseModel):
 @app.post("/register_face/")
 async def register_face(name: str = Form(...), file: UploadFile = File(...)):
     try:
-        image = face_recognition.load_image_file(io.BytesIO(await file.read()))
+        image = Image.open(io.BytesIO(await file.read()))
+        image = ImageOps.exif_transpose(image)
+        image = np.array(image)
         face_encodings = face_recognition.face_encodings(image)
         
         if not face_encodings:
@@ -57,7 +60,9 @@ async def register_face(name: str = Form(...), file: UploadFile = File(...)):
 @app.post("/recognize_face/{id}")
 async def recognize_face(id: int, file: UploadFile = File(...)):
     try:
-        image = face_recognition.load_image_file(io.BytesIO(await file.read()))
+        image = Image.open(io.BytesIO(await file.read()))
+        image = ImageOps.exif_transpose(image)
+        image = np.array(image)
         face_encodings = face_recognition.face_encodings(image)
         
         if not face_encodings:
