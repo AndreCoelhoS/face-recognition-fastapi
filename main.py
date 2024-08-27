@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import face_recognition
 import sqlite3
@@ -6,6 +7,15 @@ import numpy as np
 import io
 
 app = FastAPI()
+
+# Configurar o middleware de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Conectar ao banco de dados SQLite
 conn = sqlite3.connect('faces.db', check_same_thread=False)
@@ -33,14 +43,11 @@ async def register_face(name: str = Form(...), file: UploadFile = File(...)):
         if not face_encodings:
             raise HTTPException(status_code=400, detail="No face found in the image")
         
-        # Converter o encoding para um formato compatível com SQLite (BLOB)
         encoding_blob = face_encodings[0].tobytes()
         
-        # Inserir os dados na tabela do SQLite
         cursor.execute("INSERT INTO faces (name, encoding) VALUES (?, ?)", (name, encoding_blob))
         conn.commit()
         
-        # Recuperar a ID gerada para o registro
         face_id = cursor.lastrowid
         
         return {"message": f"Face registered for {name}", "id": face_id}
@@ -50,14 +57,12 @@ async def register_face(name: str = Form(...), file: UploadFile = File(...)):
 @app.post("/recognize_face/{id}")
 async def recognize_face(id: int, file: UploadFile = File(...)):
     try:
-        # Carregar a imagem enviada para reconhecimento
         image = face_recognition.load_image_file(io.BytesIO(await file.read()))
         face_encodings = face_recognition.face_encodings(image)
         
         if not face_encodings:
             raise HTTPException(status_code=400, detail="No face found in the image")
         
-        # Recuperar o encoding do banco de dados baseado na ID
         cursor.execute("SELECT encoding FROM faces WHERE id = ?", (id,))
         result = cursor.fetchone()
         
@@ -66,7 +71,6 @@ async def recognize_face(id: int, file: UploadFile = File(...)):
         
         stored_encoding = np.frombuffer(result[0], dtype=np.float64)
         
-        # Comparar a face enviada com a armazenada
         match = face_recognition.compare_faces([stored_encoding], face_encodings[0])[0]
         
         if match:
